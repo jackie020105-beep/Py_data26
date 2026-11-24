@@ -5,8 +5,17 @@ import mylib.myTextAnalyzer as ta
 import mylib.myStreamlitVisualizer as sv
 
 with st.sidebar:
+    # datafile = "./data/daum_movie_review.csv"
+    datafile = st.file_uploader("분석할 파일 선택", type=['csv'])
     col_name = st.text_input('데이터가 있는 컬럼명')
+    if st.button('데이터 파일 확인'):
+        if datafile:
+            data_df = ta.load_corpus(datafile)
+            sv.view_raw_data_dialog(data_df)
+        else:
+            st.warning('데이터 파일을 선택한 후 확인하세요')
 
+            
     st.write('## 설정')
     with st.form('my_form'):
         # 빈도수 그래프 관련 설정
@@ -28,18 +37,20 @@ if submitted:
 
     status.info('데이터 분석 중...')
 
-    # 데이터 로딩
-    corpus = ta.load_corpus()
+    corpus = ta.load_corpus(datafile)
 
     # 빈도수 산출
-    ta.get_freg_word(corpus)
+    target_col = 'review'
+    counter = ta.get_freg_word(corpus, target_col)
 
     # 사용자 설정에 따라 시각화
-    
+
 
     status.info(f'분석 완료')
 
     if do_graph:
         st.info(f'빈도수 그래프({num_word_graph}) ')
+        sv.visualize_graph(counter, num_word_graph)
     if do_wordcloud:
         st.info(f'워드클라우드({num_word_wc})')
+        sv.visualize_wordcloud(counter, num_word_wc)
